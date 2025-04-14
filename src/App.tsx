@@ -7,6 +7,9 @@ import DataTable from '@pages/DataTable'
 import Gallery from '@pages/Gallery'
 import Home from '@pages/Home'
 
+import { GalleryProvider } from '@/context/gallery/GalleryContext'
+import ImageDetail from '@/pages/Gallery/ImageDetail'
+
 function App() {
   return (
     <ToastProvider>
@@ -14,7 +17,17 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/gallery" element={<Gallery />} />
+            <Route
+              path="/gallery/*"
+              element={
+                <GalleryProvider>
+                  <Routes>
+                    <Route index element={<Gallery />} />
+                    <Route path=":imageId" element={<ImageDetail />} />
+                  </Routes>
+                </GalleryProvider>
+              }
+            />
             <Route path="/card-game" element={<CardGame />} />
             <Route path="/data-table" element={<DataTable />} />
           </Routes>
