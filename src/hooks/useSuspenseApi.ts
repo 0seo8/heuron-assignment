@@ -1,36 +1,34 @@
+import type { PicsumImage } from '@/types/gallery'
+
 import { useState, useCallback } from 'react'
 
-// 전역 프로미스 캐시
-const promiseCache = new Map<string, Promise<unknown>>()
+import { fetcher } from '@utils/api/fetcher'
 
-export const useSuspenseApi = <T = unknown>(baseUrl?: string) => {
+import { useApiErrorToast } from './useApiErrorToast'
+
+const promiseCache = new Map<string, Promise<PicsumImage | PicsumImage[]>>()
+
+export const useSuspenseApi = <T = unknown>(defaultOptions?: {
+  baseUrl?: string
+}) => {
   const [error, setError] = useState<Error | null>(null)
+  const { handleApiError } = useApiErrorToast()
 
   const request = useCallback(
-    async (url: string, cacheKey: string): Promise<T> => {
-      if (!promiseCache.has(cacheKey)) {
-        // 새로운 요청 생성 및 캐싱
-        const fullUrl = baseUrl ? `${baseUrl}${url}` : url
-        const promise = fetch(fullUrl)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`API 요청 실패: ${response.status}`)
-            }
-            return response.json() as Promise<T>
-          })
-          .catch((err) => {
-            // 에러 상태 업데이트
-            setError(err instanceof Error ? err : new Error('알 수 없는 오류'))
-
-            throw err
-          })
-
-        promiseCache.set(cacheKey, promise)
+    async (url: string, key: string): Promise<T> => {
+      if (!promiseCache.has(key)) {
+        const promise = fetcher<T>(url, { ...defaultOptions }).catch((err) => {
+          const errorObj =
+            err instanceof Error ? err : new Error('Unknown error')
+          setError(errorObj)
+          handleApiError(errorObj)
+          throw errorObj
+        })
+        promiseCache.set(key, promise as Promise<PicsumImage | PicsumImage[]>)
       }
-
-      return promiseCache.get(cacheKey) as Promise<T>
+      return promiseCache.get(key)! as Promise<T>
     },
-    [baseUrl],
+    [defaultOptions, handleApiError],
   )
 
   return { request, error }

@@ -24,7 +24,7 @@ type GalleryAction =
 
 const initialState: GalleryState = {
   isGrayscale: false,
-  scale: 0.5,
+  scale: 1.0,
   rotation: 0,
 }
 
@@ -40,7 +40,7 @@ function galleryReducer(
     case 'SET_ROTATION':
       return { ...state, rotation: action.payload }
     case 'RESET_TRANSFORM':
-      return { isGrayscale: false, scale: 0.5, rotation: 0 }
+      return { isGrayscale: false, scale: 1.0, rotation: 0 }
     default:
       return state
   }
@@ -48,7 +48,7 @@ function galleryReducer(
 
 const GalleryContext = createContext<GalleryContextType | undefined>(undefined)
 
-export function GalleryProvider({ children }: { children: ReactNode }) {
+export function GalleryProvider({ children }: { children?: ReactNode }) {
   const [state, dispatch] = useReducer(galleryReducer, initialState)
 
   const setGrayscale = (value: boolean) => {

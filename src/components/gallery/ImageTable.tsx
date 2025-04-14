@@ -7,7 +7,7 @@ export default function ImageTable() {
   const navigate = useNavigate()
   const { getImageList, listError } = useGalleryApi()
 
-  const imageListPromise = getImageList()
+  const imageListPromise = getImageList(1, 10)
   const imageList = use(imageListPromise)
 
   const handleRowClick = (imageId: string) => {
