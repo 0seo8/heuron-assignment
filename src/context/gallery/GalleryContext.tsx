@@ -1,132 +1,91 @@
-import type {
-  ImageViewerState,
-  ImageViewerAction,
-  PicsumImage,
-} from '@/types/gallery'
+import { createContext, useContext, useReducer, ReactNode } from 'react'
 
-import { createContext, useContext, useReducer } from 'react'
-import type { ReactNode } from 'react'
-
-// 초기 상태
-const initialState: ImageViewerState = {
-  selectedImage: null,
-  isGrayscale: false,
-  scale: 1,
-  rotation: 0,
-  isModalOpen: false,
+interface GalleryState {
+  isGrayscale: boolean
+  scale: number
+  rotation: number
 }
 
-// 리듀서 함수
-const imageViewerReducer = (
-  state: ImageViewerState,
-  action: ImageViewerAction,
-): ImageViewerState => {
+interface GalleryContextType {
+  isGrayscale: boolean
+  scale: number
+  rotation: number
+  setGrayscale: (value: boolean) => void
+  setScale: React.Dispatch<React.SetStateAction<number>>
+  setRotation: React.Dispatch<React.SetStateAction<number>>
+  resetTransform: () => void
+}
+
+type GalleryAction =
+  | { type: 'SET_GRAYSCALE'; payload: boolean }
+  | { type: 'SET_SCALE'; payload: number }
+  | { type: 'SET_ROTATION'; payload: number }
+  | { type: 'RESET_TRANSFORM' }
+
+const initialState: GalleryState = {
+  isGrayscale: false,
+  scale: 1.0,
+  rotation: 0,
+}
+
+function galleryReducer(
+  state: GalleryState,
+  action: GalleryAction,
+): GalleryState {
   switch (action.type) {
-    case 'SELECT_IMAGE':
-      return {
-        ...state,
-        selectedImage: action.payload,
-        isModalOpen: true,
-      }
-    case 'TOGGLE_GRAYSCALE':
-      return {
-        ...state,
-        isGrayscale: !state.isGrayscale,
-      }
+    case 'SET_GRAYSCALE':
+      return { ...state, isGrayscale: action.payload }
     case 'SET_SCALE':
-      return {
-        ...state,
-        scale: action.payload,
-      }
+      return { ...state, scale: action.payload }
     case 'SET_ROTATION':
-      return {
-        ...state,
-        rotation: action.payload,
-      }
+      return { ...state, rotation: action.payload }
     case 'RESET_TRANSFORM':
-      return {
-        ...state,
-        scale: 1,
-        rotation: 0,
-      }
-    case 'OPEN_MODAL':
-      return {
-        ...state,
-        isModalOpen: true,
-      }
-    case 'CLOSE_MODAL':
-      return {
-        ...state,
-        isModalOpen: false,
-      }
+      return { isGrayscale: false, scale: 1.0, rotation: 0 }
     default:
       return state
   }
 }
 
-interface GalleryContextType {
-  state: ImageViewerState
-  selectImage: (image: PicsumImage) => void
-  toggleGrayscale: () => void
-  setScale: (scale: number) => void
-  setRotation: (rotation: number) => void
-  resetTransform: () => void
-  openModal: () => void
-  closeModal: () => void
-}
-
 const GalleryContext = createContext<GalleryContextType | undefined>(undefined)
 
-export const GalleryProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(imageViewerReducer, initialState)
+export function GalleryProvider({ children }: { children?: ReactNode }) {
+  const [state, dispatch] = useReducer(galleryReducer, initialState)
 
-  const selectImage = (image: PicsumImage) => {
-    dispatch({ type: 'SELECT_IMAGE', payload: image })
+  const setGrayscale = (value: boolean) => {
+    dispatch({ type: 'SET_GRAYSCALE', payload: value })
   }
 
-  const toggleGrayscale = () => {
-    dispatch({ type: 'TOGGLE_GRAYSCALE' })
+  const setScale = (value: React.SetStateAction<number>) => {
+    const newScale = typeof value === 'function' ? value(state.scale) : value
+    dispatch({ type: 'SET_SCALE', payload: newScale })
   }
 
-  const setScale = (scale: number) => {
-    dispatch({ type: 'SET_SCALE', payload: scale })
-  }
-
-  const setRotation = (rotation: number) => {
-    dispatch({ type: 'SET_ROTATION', payload: rotation })
+  const setRotation = (value: React.SetStateAction<number>) => {
+    const newRotation =
+      typeof value === 'function' ? value(state.rotation) : value
+    dispatch({ type: 'SET_ROTATION', payload: newRotation })
   }
 
   const resetTransform = () => {
     dispatch({ type: 'RESET_TRANSFORM' })
   }
 
-  const openModal = () => {
-    dispatch({ type: 'OPEN_MODAL' })
-  }
-
-  const closeModal = () => {
-    dispatch({ type: 'CLOSE_MODAL' })
+  const value: GalleryContextType = {
+    isGrayscale: state.isGrayscale,
+    scale: state.scale,
+    rotation: state.rotation,
+    setGrayscale,
+    setScale,
+    setRotation,
+    resetTransform,
   }
 
   return (
-    <GalleryContext.Provider
-      value={{
-        state,
-        selectImage,
-        toggleGrayscale,
-        setScale,
-        setRotation,
-        resetTransform,
-        openModal,
-        closeModal,
-      }}
-    >
-      {children}
-    </GalleryContext.Provider>
+    <GalleryContext.Provider value={value}>{children}</GalleryContext.Provider>
   )
 }
 
-export const useGallery = (): GalleryContextType => {
+export function useGallery() {
   const context = useContext(GalleryContext)
   if (context === undefined) {
     throw new Error('useGallery must be used within a GalleryProvider')

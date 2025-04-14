@@ -1,40 +1,36 @@
-import { fetcher } from '@/utils/api/fetcher'
+import type { PicsumImage } from '@/types/gallery'
 
-const PICSUM_API_URL = 'https://picsum.photos'
+import { useCallback } from 'react'
 
-export interface PicsumImage {
-  id: string
-  author: string
-  width: number
-  height: number
-  url: string
-  download_url: string
-}
+import { useSuspenseApi } from '@/hooks/useSuspenseApi'
 
-export const getImageList = async (
-  page = 1,
-  limit = 30,
-): Promise<PicsumImage[]> => {
-  try {
-    return await fetcher<PicsumImage[]>(
-      `/v2/list?page=${page}&limit=${limit}`,
-      {
-        baseUrl: PICSUM_API_URL,
-      },
-    )
-  } catch (error) {
-    console.error('이미지 목록을 가져오는 데 실패했습니다:', error)
-    throw error
-  }
-}
+export const BASE_URL = 'https://picsum.photos'
 
-export const getImageById = async (id: string): Promise<PicsumImage> => {
-  try {
-    return await fetcher<PicsumImage>(`/id/${id}/info`, {
-      baseUrl: PICSUM_API_URL,
-    })
-  } catch (error) {
-    console.error(`ID ${id}의 이미지를 가져오는 데 실패했습니다:`, error)
-    throw error
+export const useGalleryApi = () => {
+  const listApi = useSuspenseApi<PicsumImage[]>({ baseUrl: BASE_URL })
+  const detailApi = useSuspenseApi<PicsumImage>({ baseUrl: BASE_URL })
+
+  const getImageList = useCallback(
+    (page = 1, limit = 30) => {
+      return listApi.request(
+        `/v2/list?page=${page}&limit=${limit}`,
+        `list:${page}:${limit}`,
+      )
+    },
+    [listApi],
+  )
+
+  const getImageById = useCallback(
+    (id: string) => {
+      return detailApi.request(`/id/${id}/info`, `id:${id}`)
+    },
+    [detailApi],
+  )
+
+  return {
+    getImageList,
+    getImageById,
+    listError: listApi.error,
+    detailError: detailApi.error,
   }
 }

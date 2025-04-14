@@ -4,7 +4,7 @@ import {
   ServerError,
 } from '@utils/api/errorTypes'
 
-type FetcherOptions = RequestInit & {
+export type FetcherOptions = RequestInit & {
   baseUrl?: string
   timeout?: number
 }
