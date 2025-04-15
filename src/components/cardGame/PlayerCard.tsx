@@ -5,7 +5,7 @@ type PlayerCardProps = {
   isWinner: boolean
 }
 
-export default function PlayerCard({ player, isWinner }: PlayerCardProps) {
+const PlayerCard = ({ player, isWinner }: PlayerCardProps) => {
   return (
     <div
       className={`
@@ -53,3 +53,5 @@ export default function PlayerCard({ player, isWinner }: PlayerCardProps) {
     </div>
   )
 }
+
+export default PlayerCard

@@ -1,10 +1,10 @@
 import { Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 
-import ImageDetailContent from '@components/gallery/ImageDetailContent'
-import ImageDetailSkeleton from '@components/gallery/ImageDetailSkeleton'
+import ImageDetailContent from '@components/gallery/ImageDetailContent.tsx'
+import ImageDetailSkeleton from '@components/gallery/ImageDetailSkeleton.tsx'
 
-export default function ImageDetail() {
+const ImageDetail = () => {
   const { imageId } = useParams<{ imageId: string }>()
   const navigate = useNavigate()
 
@@ -30,3 +30,5 @@ export default function ImageDetail() {
     </Suspense>
   )
 }
+
+export default ImageDetail

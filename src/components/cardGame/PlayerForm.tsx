@@ -9,10 +9,7 @@ type PlayerFormProps = {
   isLoading?: boolean
 }
 
-export default function PlayerForm({
-  onSubmit,
-  isLoading = false,
-}: PlayerFormProps) {
+const PlayerForm = ({ onSubmit, isLoading = false }: PlayerFormProps) => {
   const { addToast } = useToast()
   const [formData, setFormData] = useState<PlayerFormData>({
     playerCount: 2,
@@ -169,3 +166,5 @@ export default function PlayerForm({
     </form>
   )
 }
+
+export default PlayerForm

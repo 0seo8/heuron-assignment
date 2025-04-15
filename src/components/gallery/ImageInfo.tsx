@@ -3,8 +3,7 @@ import type { PicsumImage } from '@/types/gallery'
 type ImageInfoProps = {
   image: PicsumImage
 }
-
-export default function ImageInfo({ image }: ImageInfoProps) {
+const ImageInfo = ({ image }: ImageInfoProps) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
       <h2 className="text-xl font-semibold mb-4">이미지 정보</h2>
@@ -47,3 +46,5 @@ export default function ImageInfo({ image }: ImageInfoProps) {
     </div>
   )
 }
+
+export default ImageInfo

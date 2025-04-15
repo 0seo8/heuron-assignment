@@ -1,8 +1,15 @@
 import type { PicsumImage } from '@/types/gallery'
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useCallback,
+} from 'react'
 
 import { useGallery } from '@/context/gallery/GalleryContext'
+import { useImageManipulation } from '@/hooks/useImageManipulation'
 import { BASE_URL } from '@/services/api/galleryApi'
 
 type CanvasViewerProps = {
@@ -12,12 +19,12 @@ type CanvasViewerProps = {
   rotation: number
 }
 
-const CanvasViewer = ({
+const CanvasViewer = React.memo(function CanvasViewer({
   image,
   isGrayscale,
   scale,
   rotation,
-}: CanvasViewerProps) => {
+}: CanvasViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement | null>(null)
@@ -27,15 +34,14 @@ const CanvasViewer = ({
   const isGrayscaleRef = useRef(isGrayscale)
 
   const { setScale, setRotation } = useGallery()
-  const [isDragging, setIsDragging] = useState<'left' | 'right' | null>(null)
-  const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(
-    null,
-  )
   const [containerSize, setContainerSize] = useState({
     width: 800,
     height: 600,
   })
   const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false)
+
+  const { isDragging, handleMouseDown, handleContextMenu, handleKeyDown } =
+    useImageManipulation(setScale, setRotation)
 
   useEffect(() => {
     scaleRef.current = scale
@@ -60,9 +66,12 @@ const CanvasViewer = ({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const getOptimizedImageUrl = (id: string, width: number, height: number) => {
-    return `${BASE_URL}/id/${id}/${width}/${height}`
-  }
+  const getOptimizedImageUrl = useCallback(
+    (id: string, width: number, height: number) => {
+      return `${BASE_URL}/id/${id}/${width}/${height}`
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!image) return
@@ -117,148 +126,89 @@ const CanvasViewer = ({
       blurImageRef.current = null
       setIsHighQualityLoaded(false)
     }
-  }, [image, containerSize.width, containerSize.height])
+  }, [image, containerSize.width, containerSize.height, getOptimizedImageUrl])
 
-  const renderCanvas = (
-    imgElement: HTMLImageElement | null = null,
-    isHighQuality = false,
-  ) => {
-    const canvas = canvasRef.current
-    const img =
-      imgElement || (isHighQuality ? imageRef.current : blurImageRef.current)
+  const renderCanvas = useCallback(
+    (imgElement: HTMLImageElement | null = null, isHighQuality = false) => {
+      const canvas = canvasRef.current
+      const img =
+        imgElement || (isHighQuality ? imageRef.current : blurImageRef.current)
 
-    if (!canvas || !img) return
+      if (!canvas || !img) return
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
 
-    const dpr = window.devicePixelRatio || 1
+      const dpr = window.devicePixelRatio || 1
 
-    const displayWidth = containerSize.width
-    const displayHeight = containerSize.height
+      const displayWidth = containerSize.width
+      const displayHeight = containerSize.height
 
-    canvas.style.width = `${displayWidth}px`
-    canvas.style.height = `${displayHeight}px`
+      canvas.style.width = `${displayWidth}px`
+      canvas.style.height = `${displayHeight}px`
 
-    canvas.width = displayWidth * dpr
-    canvas.height = displayHeight * dpr
+      canvas.width = displayWidth * dpr
+      canvas.height = displayHeight * dpr
 
-    const imgRatio = img.height / img.width
+      const imgRatio = img.height / img.width
 
-    let baseWidth, baseHeight
-    const canvasRatio = displayHeight / displayWidth
+      let baseWidth, baseHeight
+      const canvasRatio = displayHeight / displayWidth
 
-    if (imgRatio > canvasRatio) {
-      baseHeight = displayHeight
-      baseWidth = baseHeight / imgRatio
-    } else {
-      baseWidth = displayWidth
-      baseHeight = baseWidth * imgRatio
-    }
+      if (imgRatio > canvasRatio) {
+        baseHeight = displayHeight
+        baseWidth = baseHeight / imgRatio
+      } else {
+        baseWidth = displayWidth
+        baseHeight = baseWidth * imgRatio
+      }
 
-    ctx.resetTransform()
-    ctx.scale(dpr, dpr)
-    ctx.clearRect(0, 0, displayWidth, displayHeight)
-
-    ctx.translate(displayWidth / 2, displayHeight / 2)
-    ctx.rotate((rotationRef.current * Math.PI) / 180)
-    ctx.scale(scaleRef.current, scaleRef.current)
-
-    if (!isHighQuality && !isHighQualityLoaded) {
-      ctx.filter = 'blur(8px)'
-    } else {
-      ctx.filter = 'none'
-    }
-
-    ctx.drawImage(img, -baseWidth / 2, -baseHeight / 2, baseWidth, baseHeight)
-
-    ctx.filter = 'none'
-
-    if (isGrayscaleRef.current) {
-      ctx.save()
       ctx.resetTransform()
+      ctx.scale(dpr, dpr)
+      ctx.clearRect(0, 0, displayWidth, displayHeight)
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      const data = imageData.data
+      ctx.translate(displayWidth / 2, displayHeight / 2)
+      ctx.rotate((rotationRef.current * Math.PI) / 180)
+      ctx.scale(scaleRef.current, scaleRef.current)
 
-      for (let i = 0; i < data.length; i += 4) {
-        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3
-        data[i] = avg
-        data[i + 1] = avg
-        data[i + 2] = avg
+      if (!isHighQuality && !isHighQualityLoaded) {
+        ctx.filter = 'blur(8px)'
+      } else {
+        ctx.filter = 'none'
       }
 
-      ctx.putImageData(imageData, 0, 0)
-      ctx.restore()
-    }
-  }
+      ctx.drawImage(img, -baseWidth / 2, -baseHeight / 2, baseWidth, baseHeight)
+
+      ctx.filter = 'none'
+
+      if (isGrayscaleRef.current) {
+        ctx.save()
+        ctx.resetTransform()
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const data = imageData.data
+
+        for (let i = 0; i < data.length; i += 4) {
+          const avg = (data[i] + data[i + 1] + data[i + 2]) / 3
+          data[i] = avg
+          data[i + 1] = avg
+          data[i + 2] = avg
+        }
+
+        ctx.putImageData(imageData, 0, 0)
+        ctx.restore()
+      }
+    },
+    [containerSize, isHighQualityLoaded],
+  )
 
   useEffect(() => {
     requestAnimationFrame(() => renderCanvas(null, isHighQualityLoaded))
-  }, [scale, rotation, isGrayscale, isHighQualityLoaded])
+  }, [scale, rotation, isGrayscale, isHighQualityLoaded, renderCanvas])
 
   useEffect(() => {
     requestAnimationFrame(() => renderCanvas(null, isHighQualityLoaded))
-  }, [containerSize])
-
-  useEffect(() => {
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!isDragging || !startPos) return
-
-      const deltaX = e.clientX - startPos.x
-      const deltaY = e.clientY - startPos.y
-
-      if (isDragging === 'left') {
-        const sensitivity = 0.01
-        const scaleChange = deltaY * -sensitivity
-
-        if (Math.abs(deltaY) > 0) {
-          setScale((prev) => {
-            return Math.max(0.1, Math.min(10, prev + scaleChange))
-          })
-        }
-      } else if (isDragging === 'right') {
-        const sensitivity = 0.3
-        const rotationChange = deltaX * sensitivity
-
-        if (Math.abs(deltaX) > 0) {
-          setRotation((prev) => {
-            let newRotation = (prev + rotationChange) % 360
-            if (newRotation < 0) newRotation += 360
-            return newRotation
-          })
-        }
-      }
-
-      setStartPos({ x: e.clientX, y: e.clientY })
-    }
-
-    const handleGlobalMouseUp = () => {
-      setIsDragging(null)
-      setStartPos(null)
-    }
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleGlobalMouseMove)
-      document.addEventListener('mouseup', handleGlobalMouseUp)
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleGlobalMouseMove)
-      document.removeEventListener('mouseup', handleGlobalMouseUp)
-    }
-  }, [isDragging, startPos, setScale, setRotation])
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    e.preventDefault()
-    if (e.button === 0) setIsDragging('left')
-    if (e.button === 2) setIsDragging('right')
-    setStartPos({ x: e.clientX, y: e.clientY })
-  }
-
-  const handleContextMenu = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    e.preventDefault()
-  }
+  }, [containerSize, isHighQualityLoaded, renderCanvas])
 
   return (
     <div
@@ -271,9 +221,13 @@ const CanvasViewer = ({
       </div>
       <canvas
         ref={canvasRef}
-        className="w-full h-full cursor-grab"
+        className={`w-full h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         onMouseDown={handleMouseDown}
         onContextMenu={handleContextMenu}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        aria-label={`${image?.author || '이미지'} - 왼쪽 마우스 드래그로 확대/축소, 오른쪽 마우스 드래그로 회전, +/- 키로 확대/축소, 화살표 키로 회전`}
+        role="img"
       />
       <div className="absolute bottom-2 right-2 text-sm bg-black bg-opacity-50 text-white px-2 py-1 rounded">
         <div className="flex items-center space-x-1">
@@ -282,8 +236,12 @@ const CanvasViewer = ({
           <span>{Math.round(rotation)}°</span>
         </div>
       </div>
+      <div className="absolute bottom-2 left-2 text-xs text-white bg-black bg-opacity-50 p-1 rounded hidden sm:block">
+        <p>왼쪽 드래그: 확대/축소 | 오른쪽 드래그: 회전</p>
+        <p>키보드: +/- (확대/축소), ←/→ (회전)</p>
+      </div>
     </div>
   )
-}
+})
 
-export default React.memo(CanvasViewer)
+export default CanvasViewer

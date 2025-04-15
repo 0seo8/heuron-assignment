@@ -3,13 +3,13 @@ import type { PlayerFormData } from '@/types/cardGame'
 import CardDistribution from '@/components/cardGame/CardDistribution'
 import GameResult from '@/components/cardGame/GameResult'
 import PlayerForm from '@/components/cardGame/PlayerForm'
-import { PlayerNamesForm } from '@/components/cardGame/PlayerNamesForm'
+import PlayerNamesForm from '@/components/cardGame/PlayerNamesForm'
 import {
   CardGameProvider,
   useCardGame,
 } from '@/context/cardGame/CardGameContext'
 
-function CardGameContent() {
+const CardGameContent = () => {
   const { state, setupGame, distributeCards, resetGame } = useCardGame()
   const { players, playerCount, cardCount, currentStep, winner } = state
 
@@ -51,7 +51,7 @@ function CardGameContent() {
   return <div className="max-w-4xl mx-auto">{renderStepContent()}</div>
 }
 
-export default function CardGame() {
+const CardGame = () => {
   return (
     <div className="container mx-auto p-4 min-h-[calc(100vh-64px)]">
       <h1 className="text-2xl font-bold mb-6">카드 게임</h1>
@@ -62,3 +62,5 @@ export default function CardGame() {
     </div>
   )
 }
+
+export default CardGame

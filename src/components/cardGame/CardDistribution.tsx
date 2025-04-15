@@ -1,5 +1,6 @@
-import { useCardGame } from '@/context/cardGame/CardGameContext'
 import { useState } from 'react'
+
+import { useCardGame } from '@/context/cardGame/CardGameContext'
 
 type CardDistributionProps = {
   playerCount: number
@@ -7,11 +8,11 @@ type CardDistributionProps = {
   onDistribute: () => void
 }
 
-export default function CardDistribution({
+const CardDistribution = ({
   playerCount,
   cardCount,
   onDistribute,
-}: CardDistributionProps) {
+}: CardDistributionProps) => {
   const { state } = useCardGame()
   const { players } = state
 
@@ -194,3 +195,5 @@ export default function CardDistribution({
     </div>
   )
 }
+
+export default CardDistribution

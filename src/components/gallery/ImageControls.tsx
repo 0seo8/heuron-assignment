@@ -8,7 +8,7 @@ type ImageControlsProps = {
   resetTransform: () => void
 }
 
-export default function ImageControls({
+const ImageControls = ({
   isGrayscale,
   setGrayscale,
   scale,
@@ -16,7 +16,7 @@ export default function ImageControls({
   rotation,
   setRotation,
   resetTransform,
-}: ImageControlsProps) {
+}: ImageControlsProps) => {
   const displayScale = scale * 2
 
   return (
@@ -80,3 +80,4 @@ export default function ImageControls({
     </div>
   )
 }
+export default ImageControls

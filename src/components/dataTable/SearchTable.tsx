@@ -8,9 +8,7 @@ import { useDataTable } from '@/hooks/useDataTable'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { SearchTableProps } from '@/types'
 
-export const SearchTable = memo(function SearchTable({
-  columns,
-}: SearchTableProps) {
+const SearchTable = memo(function SearchTable({ columns }: SearchTableProps) {
   const {
     data,
     isLoading,
@@ -32,12 +30,6 @@ export const SearchTable = memo(function SearchTable({
 
   useEffect(() => {
     if (isVisible && hasMore && !isLoading && !isFetchingMore) {
-      console.log('Loading more data...', {
-        isVisible,
-        hasMore,
-        isLoading,
-        isFetchingMore,
-      })
       loadMoreData()
     }
   }, [isVisible, hasMore, isLoading, isFetchingMore, loadMoreData])
@@ -67,7 +59,7 @@ export const SearchTable = memo(function SearchTable({
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
         <p className="font-semibold">오류 발생</p>
         <p>
-          {error.message || '뉴스를 불러오지 못했습니다. 다시 시도해주세요.'}
+          {error.message || '데이터를 불러오지 못했습니다. 다시 시도해주세요.'}
         </p>
         <button
           onClick={() => refetchData()}
