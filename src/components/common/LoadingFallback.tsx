@@ -1,6 +1,12 @@
 import React from 'react'
 
-const LoadingFallback: React.FC = () => {
+interface LoadingFallbackProps {
+  message?: string
+}
+
+const LoadingFallback: React.FC<LoadingFallbackProps> = ({
+  message = '로딩 중...',
+}) => {
   return (
     <div className="flex items-center justify-center min-h-[50vh]">
       <div className="flex flex-col items-center">
@@ -10,7 +16,7 @@ const LoadingFallback: React.FC = () => {
             <div className="h-12 w-12 rounded-full bg-white"></div>
           </div>
         </div>
-        <p className="mt-4 text-gray-600 text-lg font-medium">로딩 중...</p>
+        <p className="mt-4 text-gray-600 text-lg font-medium">{message}</p>
         <p className="text-gray-500 text-sm">잠시만 기다려 주세요</p>
       </div>
     </div>
