@@ -7,11 +7,13 @@ import {
   DataTableHookResult,
   SearchFilters,
 } from '@/types/dataTable'
+import { isDateMatching } from '@/utils/dateUtils'
 
 /**
  * 데이터 테이블을 위한 데이터 로딩 및 필터링 기능을 제공하는 커스텀 훅
  * @returns 데이터 테이블에 필요한 상태 및 기능 모음
  */
+
 export const useDataTable = (): DataTableHookResult => {
   const { fetchDataItems, refetchDataItems, error } = useNewsApi()
   const [allData, setAllData] = useState<DataItem[]>([])
@@ -41,6 +43,7 @@ export const useDataTable = (): DataTableHookResult => {
           page: 1,
           filters: { title: '', source: '', publishedAt: '' },
         })
+
         setAllData(initialData.data)
         setFilteredData(initialData.data)
         setTotalResults(initialData.total)
@@ -59,8 +62,10 @@ export const useDataTable = (): DataTableHookResult => {
   useEffect(() => {
     if (!isInitialDataLoaded.current || allData.length === 0) return
     setIsFilterChanging(true)
+
     const applyFilters = () => {
       let results = [...allData]
+
       if (filters.title) {
         const titleLower = filters.title.toLowerCase()
         results = results.filter((item) =>
@@ -69,6 +74,7 @@ export const useDataTable = (): DataTableHookResult => {
             : false,
         )
       }
+
       if (filters.source) {
         const sourceLower = filters.source.toLowerCase()
         results = results.filter((item) =>
@@ -77,25 +83,20 @@ export const useDataTable = (): DataTableHookResult => {
             : false,
         )
       }
+
       if (filters.publishedAt) {
-        const dateRegex = /^\d{4}-\d{2}-\d{2}$/
-        if (dateRegex.test(filters.publishedAt)) {
-          results = results.filter((item) =>
-            item.publishedAt && typeof item.publishedAt === 'string'
-              ? item.publishedAt.startsWith(filters.publishedAt)
-              : false,
-          )
-        } else {
-          const dateLower = filters.publishedAt.toLowerCase()
-          results = results.filter((item) =>
-            item.publishedAt && typeof item.publishedAt === 'string'
-              ? item.publishedAt.toLowerCase().includes(dateLower)
-              : false,
-          )
-        }
+        results = results.filter((item) => {
+          if (!item.publishedAt || typeof item.publishedAt !== 'string') {
+            return false
+          }
+
+          return isDateMatching(item.publishedAt, filters.publishedAt)
+        })
       }
+
       return results
     }
+
     const filtered = applyFilters()
     setFilteredData(filtered)
     setTotalResults(filtered.length)
@@ -124,7 +125,10 @@ export const useDataTable = (): DataTableHookResult => {
       const newAllData = [...allData, ...result.data]
       setAllData(newAllData)
       let filteredResults = newAllData
+
+      // 필터 적용
       if (filters.title || filters.source || filters.publishedAt) {
+        // 제목 필터
         if (filters.title) {
           const titleLower = filters.title.toLowerCase()
           filteredResults = filteredResults.filter((item) =>
@@ -133,6 +137,8 @@ export const useDataTable = (): DataTableHookResult => {
               : false,
           )
         }
+
+        // 출처 필터
         if (filters.source) {
           const sourceLower = filters.source.toLowerCase()
           filteredResults = filteredResults.filter((item) =>
@@ -141,24 +147,19 @@ export const useDataTable = (): DataTableHookResult => {
               : false,
           )
         }
+
+        // 날짜 필터
         if (filters.publishedAt) {
-          const dateRegex = /^\d{4}-\d{2}-\d{2}$/
-          if (dateRegex.test(filters.publishedAt)) {
-            filteredResults = filteredResults.filter((item) =>
-              item.publishedAt && typeof item.publishedAt === 'string'
-                ? item.publishedAt.startsWith(filters.publishedAt)
-                : false,
-            )
-          } else {
-            const dateLower = filters.publishedAt.toLowerCase()
-            filteredResults = filteredResults.filter((item) =>
-              item.publishedAt && typeof item.publishedAt === 'string'
-                ? item.publishedAt.toLowerCase().includes(dateLower)
-                : false,
-            )
-          }
+          filteredResults = filteredResults.filter((item) => {
+            if (!item.publishedAt || typeof item.publishedAt !== 'string') {
+              return false
+            }
+
+            return isDateMatching(item.publishedAt, filters.publishedAt)
+          })
         }
       }
+
       setFilteredData(filteredResults)
       setTotalResults(filteredResults.length)
       setHasMore(result.hasMore)
@@ -199,6 +200,7 @@ export const useDataTable = (): DataTableHookResult => {
         filters: { title: '', source: '', publishedAt: '' },
       })
       setAllData(result.data)
+
       let filteredResults = result.data
       if (filters.title || filters.source || filters.publishedAt) {
         if (filters.title) {
@@ -209,6 +211,7 @@ export const useDataTable = (): DataTableHookResult => {
               : false,
           )
         }
+
         if (filters.source) {
           const sourceLower = filters.source.toLowerCase()
           filteredResults = filteredResults.filter((item) =>
@@ -217,24 +220,18 @@ export const useDataTable = (): DataTableHookResult => {
               : false,
           )
         }
+
         if (filters.publishedAt) {
-          const dateRegex = /^\d{4}-\d{2}-\d{2}$/
-          if (dateRegex.test(filters.publishedAt)) {
-            filteredResults = filteredResults.filter((item) =>
-              item.publishedAt && typeof item.publishedAt === 'string'
-                ? item.publishedAt.startsWith(filters.publishedAt)
-                : false,
-            )
-          } else {
-            const dateLower = filters.publishedAt.toLowerCase()
-            filteredResults = filteredResults.filter((item) =>
-              item.publishedAt && typeof item.publishedAt === 'string'
-                ? item.publishedAt.toLowerCase().includes(dateLower)
-                : false,
-            )
-          }
+          filteredResults = filteredResults.filter((item) => {
+            if (!item.publishedAt || typeof item.publishedAt !== 'string') {
+              return false
+            }
+
+            return isDateMatching(item.publishedAt, filters.publishedAt)
+          })
         }
       }
+
       setFilteredData(filteredResults)
       setTotalResults(filteredResults.length)
       setHasMore(result.hasMore)

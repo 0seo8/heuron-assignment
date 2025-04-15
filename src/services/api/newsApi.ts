@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 
 import { useSuspenseApi } from '@/hooks/useSuspenseApi'
 import { ApiResponse, DataItem, SearchFilters } from '@/types/dataTable'
+import { formatDateToKorean } from '@/utils/dateUtils'
 
 const API_KEY = '88689a3cf87845fcb4664089d14b8274'
 const BASE_URL = '/api/news'
@@ -46,7 +47,7 @@ const mapArticleToDataItem = (article: Article, index: number): DataItem => ({
   id: `${index}-${article.title}`,
   title: article.title,
   source: article.source.name,
-  publishedAt: new Date(article.publishedAt).toLocaleDateString('ko-KR'),
+  publishedAt: formatDateToKorean(article.publishedAt),
   urlToImage: article.urlToImage,
   description: article.description,
   url: article.url,

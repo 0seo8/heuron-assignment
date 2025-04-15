@@ -141,6 +141,7 @@ export const SearchTable = memo(function SearchTable({
             <HighlightedText
               text={item.publishedAt}
               highlight={filters.publishedAt}
+              isDate={true}
             />
           </td>
         </tr>

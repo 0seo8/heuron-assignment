@@ -22,6 +22,7 @@ export interface Column {
 export interface HighlightedTextProps {
   text: string
   highlight: string
+  isDate?: boolean
 }
 
 export interface DataTableHookResult {
