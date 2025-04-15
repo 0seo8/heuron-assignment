@@ -1,5 +1,5 @@
+import { escapeRegExp } from '@utils/escapeRegExp'
 import { describe, it, expect } from 'vitest'
-import { escapeRegExp } from '../../utils/escapeRegExp'
 
 describe('escapeRegExp', () => {
   it('일반 문자열은 변경되지 않아야 함', () => {
