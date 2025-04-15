@@ -154,11 +154,18 @@ const SearchTable = memo(function SearchTable({ columns }: SearchTableProps) {
     )
   }, [isLoading, isFetchingMore])
 
-  if (!data.length && !isLoading && error) {
+  if (!data && !isLoading && error) {
     return (
-      <div className="w-full space-y-4">
-        {renderSearchFields}
-        {renderError}
+      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
+        <p className="font-semibold">오류 발생</p>
+        <p>데이터를 불러오지 못했습니다. 인터넷 연결을 확인해주세요.</p>
+        <button
+          onClick={() => refetchData()}
+          className="mt-2 bg-red-100 hover:bg-red-200 transition-colors text-red-700 px-3 py-1 rounded text-sm"
+          aria-label="데이터 다시 불러오기"
+        >
+          다시 시도
+        </button>
       </div>
     )
   }
