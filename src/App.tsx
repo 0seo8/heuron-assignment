@@ -1,34 +1,82 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Suspense, lazy } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+
+import ErrorBoundary from '@components/common/ErrorBoundary'
+import Layout from '@components/common/Layout'
+import LoadingFallback from '@components/common/LoadingFallback'
+import { ToastProvider, ToastContainer } from '@components/ui/Toast'
+
+import { GalleryProvider } from '@/context/gallery/GalleryContext'
+
+const Home = lazy(() => import('@pages/Home'))
+
+const GalleryBundle = lazy(() => import('@pages/Gallery/GalleryBundle'))
+
+const CardGame = lazy(() => import('@pages/CardGame'))
+
+const DataTable = lazy(() => import('@pages/DataTable'))
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <ToastProvider>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <Layout>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Suspense
+                    fallback={<LoadingFallback message="홈 로딩 중..." />}
+                  >
+                    <Home />
+                  </Suspense>
+                }
+              />
+
+              {/* 이미지 갤러리 경로 - 번들로 통합 */}
+              <Route
+                path="/gallery/*"
+                element={
+                  <GalleryProvider>
+                    <Suspense
+                      fallback={<LoadingFallback message="갤러리 로딩 중..." />}
+                    >
+                      <GalleryBundle />
+                    </Suspense>
+                  </GalleryProvider>
+                }
+              />
+
+              <Route
+                path="/card-game"
+                element={
+                  <Suspense
+                    fallback={
+                      <LoadingFallback message="카드 게임 로딩 중..." />
+                    }
+                  >
+                    <CardGame />
+                  </Suspense>
+                }
+              />
+
+              <Route
+                path="/data-table"
+                element={
+                  <Suspense
+                    fallback={<LoadingFallback message="테이블 로딩 중..." />}
+                  >
+                    <DataTable />
+                  </Suspense>
+                }
+              />
+            </Routes>
+          </Layout>
+          <ToastContainer position="bottom-center" />
+        </BrowserRouter>
+      </ErrorBoundary>
+    </ToastProvider>
   )
 }
 
