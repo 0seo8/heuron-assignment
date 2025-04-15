@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useToast } from '@/components/ui/Toast'
 import { useCardGame } from '@/context/cardGame/CardGameContext'
 
-export function PlayerNamesForm() {
+const PlayerNamesForm = () => {
   const { state, setPlayerNames } = useCardGame()
   const { addToast } = useToast()
   const [names, setNames] = useState<string[]>(
@@ -80,3 +80,5 @@ export function PlayerNamesForm() {
     </div>
   )
 }
+
+export default PlayerNamesForm

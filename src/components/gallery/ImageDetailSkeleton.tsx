@@ -1,4 +1,4 @@
-export default function ImageDetailSkeleton() {
+const ImageDetailSkeleton = () => {
   return (
     <div className="container mx-auto p-4 animate-pulse">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -57,3 +57,5 @@ export default function ImageDetailSkeleton() {
     </div>
   )
 }
+
+export default ImageDetailSkeleton

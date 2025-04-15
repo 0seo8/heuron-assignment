@@ -6,7 +6,7 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { BASE_URL } from '@/services/api/galleryApi'
 
-export default function ImageTable() {
+const ImageTable = () => {
   const navigate = useNavigate()
   const { images, isLoading, hasMore, loadImages } = useInfiniteScroll(1, 15)
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({})
@@ -171,3 +171,5 @@ export default function ImageTable() {
     </div>
   )
 }
+
+export default ImageTable

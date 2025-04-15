@@ -8,11 +8,7 @@ type GameResultProps = {
   onRestart: () => void
 }
 
-export default function GameResult({
-  players,
-  winner,
-  onRestart,
-}: GameResultProps) {
+const GameResult = ({ players, winner, onRestart }: GameResultProps) => {
   if (!winner) {
     return <div className="text-center text-gray-500">결과가 없습니다.</div>
   }
@@ -53,3 +49,5 @@ export default function GameResult({
     </div>
   )
 }
+
+export default GameResult

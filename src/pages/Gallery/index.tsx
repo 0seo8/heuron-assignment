@@ -1,9 +1,9 @@
 import { Suspense } from 'react'
 
-import ImageTable from '@/components/gallery/ImageTable'
-import TableSkeleton from '@/components/gallery/TableSkeleton'
+import ImageTable from '@components/gallery/ImageTable.tsx'
+import TableSkeleton from '@components/gallery/TableSkeleton.tsx'
 
-export default function Gallery() {
+const Gallery = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">이미지 갤러리</h1>
@@ -13,3 +13,5 @@ export default function Gallery() {
     </div>
   )
 }
+
+export default Gallery
