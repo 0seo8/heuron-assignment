@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState } from 'react'
 export function useImageCache(urls: string[]) {
   const [loadedUrls, setLoadedUrls] = useState<Record<string, boolean>>({})
 
-  // 각 이미지를 미리 로드하는 함수
   const preloadImage = useCallback(
     (url: string) => {
       if (loadedUrls[url]) return Promise.resolve(url) // 이미 로드된 이미지는 스킵
@@ -31,7 +30,6 @@ export function useImageCache(urls: string[]) {
     [loadedUrls],
   )
 
-  // 여러 이미지를 배치로 로드하는 함수
   const preloadBatch = useCallback(
     async (urls: string[], batchSize = 5) => {
       const uniqueUrls = urls.filter((url) => !loadedUrls[url])
@@ -44,7 +42,6 @@ export function useImageCache(urls: string[]) {
     [preloadImage, loadedUrls],
   )
 
-  // 초기 이미지 URL 배열이 제공되면 미리 캐싱
   useEffect(() => {
     if (urls.length > 0) {
       preloadBatch(urls)

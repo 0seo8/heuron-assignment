@@ -19,4 +19,13 @@ export default defineConfig({
       '@styles': '/src/styles',
     },
   },
+  server: {
+    proxy: {
+      '/api/news': {
+        target: 'https://newsapi.org/v2',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/news/, ''),
+      },
+    },
+  },
 })
